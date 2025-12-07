@@ -1,0 +1,16 @@
+{
+  "test_set": {
+    "test_accuracy": 27.752762996316005,
+    "valid_action_rate": 100.0,
+    "total_samples": 4886
+  },
+  "interactive": {
+    "note": "Interactive evaluation not yet implemented",
+    "next_steps": [
+      "Install generals environment",
+      "Implement baseline agents",
+      "Create game loop",
+      "Track win rates and territory"
+    ]
+  }
+}

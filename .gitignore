@@ -1,0 +1,12 @@
+.venv
+venv/*
+2507.06825v2.pdf
+Literature Survey (1).pdf
+# data/
+*.npz
+*.pyc
+__pycache__/
+.DS_Store
+checkpoints/
+logs/
+wandb/
