@@ -1,8 +1,17 @@
 """
-DQN Fine-tuning Script
+DQN Fine-tuning Script with Reward Shaping
 
-Fine-tunes a BC-trained agent using reinforcement learning.
-This is the light fine-tuning phase (6-8 hours) that improves on BC.
+Fine-tunes a BC-trained agent using reinforcement learning with self-play.
+Based on: "Artificial Generals Intelligence: Mastering Generals.io with RL"
+Paper: https://arxiv.org/abs/2507.06825
+
+Key Features:
+- Potential-based reward shaping (Ng et al., 1999)
+- Self-play against opponent pool
+- Double DQN with target network
+- Memory-augmented observations
+
+Training time: ~4-6 hours on M4 Mac (vs 36h on H100 in paper)
 """
 
 import os
@@ -13,6 +22,7 @@ from pathlib import Path
 from datetime import datetime
 from collections import deque
 import numpy as np
+import copy
 
 import torch
 import torch.nn as nn
@@ -24,6 +34,60 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from config import Config
 from models.networks import DuelingDQN
+
+
+def potential_function(state_info, gamma=0.99):
+    """
+    Potential-based reward shaping from paper.
+    
+    ϕ(s) = 0.3*ϕ_land(s) + 0.3*ϕ_army(s) + 0.4*ϕ_castle(s)
+    
+    where ϕ_x(s) = log(x_agent / x_enemy) / log(max_ratio)
+    
+    Args:
+        state_info: Dict with 'agent_land', 'enemy_land', 'agent_army', 
+                    'enemy_army', 'agent_castles', 'enemy_castles'
+        gamma: Discount factor
+    
+    Returns:
+        Potential value in range [-1, 1]
+    """
+    max_ratio = 10.0  # Normalization constant
+    
+    # Extract values
+    agent_land = max(state_info.get('agent_land', 1), 1)
+    enemy_land = max(state_info.get('enemy_land', 1), 1)
+    agent_army = max(state_info.get('agent_army', 1), 1)
+    enemy_army = max(state_info.get('enemy_army', 1), 1)
+    agent_castles = max(state_info.get('agent_castles', 0), 0.1)
+    enemy_castles = max(state_info.get('enemy_castles', 0), 0.1)
+    
+    # Log-ratio features (symmetric around 1)
+    phi_land = np.log(agent_land / enemy_land) / np.log(max_ratio)
+    phi_army = np.log(agent_army / enemy_army) / np.log(max_ratio)
+    phi_castle = np.log(agent_castles / enemy_castles) / np.log(max_ratio)
+    
+    # Clip to [-1, 1]
+    phi_land = np.clip(phi_land, -1.0, 1.0)
+    phi_army = np.clip(phi_army, -1.0, 1.0)
+    phi_castle = np.clip(phi_castle, -1.0, 1.0)
+    
+    # Weighted combination (from paper)
+    return 0.3 * phi_land + 0.3 * phi_army + 0.4 * phi_castle
+
+
+def shaped_reward(state_info, next_state_info, original_reward, gamma=0.99):
+    """
+    Calculate shaped reward using potential-based reward shaping.
+    
+    r_shaped = r_original + γ*ϕ(s') - ϕ(s)
+    
+    This preserves optimal policies (Ng et al., 1999).
+    """
+    phi_s = potential_function(state_info, gamma)
+    phi_s_next = potential_function(next_state_info, gamma)
+    
+    return original_reward + gamma * phi_s_next - phi_s
 
 
 class ReplayBuffer:

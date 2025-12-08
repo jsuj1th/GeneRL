@@ -1,0 +1,83 @@
+╔══════════════════════════════════════════════════════════════════════════╗
+║                   ✅ WATCH PPO AGENT - QUICK GUIDE                        ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+🎮 WHAT'S FIXED
+   • watch_bc_game.py now supports BOTH BC and PPO checkpoints
+   • Auto-detects checkpoint type and loads correctly
+   • Fixed network class import (GeneralsAgent instead of DuelingDQN)
+   • Fixed PPO checkpoint unwrapping (removes "backbone." prefix)
+
+📝 QUICK START
+
+   # Watch 3 PPO games (default)
+   python src/evaluation/watch_bc_game.py
+
+   # Or use the helper script
+   ./watch_ppo.sh
+
+🎯 COMMON COMMANDS
+
+   # Fast-paced viewing (shorter delay)
+   python src/evaluation/watch_bc_game.py --delay 0.01
+
+   # Watch against random opponent
+   python src/evaluation/watch_bc_game.py --opponent random
+
+   # Watch many games
+   python src/evaluation/watch_bc_game.py --num_games 10
+
+   # Compare: Watch BC agent instead
+   python src/evaluation/watch_bc_game.py --checkpoint checkpoints/bc/best_model.pt
+
+⚙️ ALL OPTIONS
+
+   --checkpoint   Path to checkpoint (default: checkpoints/ppo_from_bc/latest_model.pt)
+   --num_games    Number of games to watch (default: 3)
+   --opponent     Opponent type: "bc" or "random" (default: "bc")
+   --epsilon      Exploration rate 0.0-1.0 (default: 0.0)
+   --delay        Delay between steps in seconds (default: 0.1)
+
+📊 WHAT YOU'LL SEE
+
+   1. Checkpoint info (type, episode, steps, win rate)
+   2. Visual game window showing the board
+   3. Real-time game progress
+   4. Final results (win/loss/draw, territory, army size)
+
+🔧 TECHNICAL DETAILS
+
+   • PPO checkpoint keys: "backbone.backbone.layers.0.weight"
+   • GeneralsAgent expects: "backbone.layers.0.weight"
+   • Solution: Strip first "backbone." prefix to unwrap policy network
+
+✅ VERIFICATION
+
+   # Test that checkpoint loading works
+   python test_watch_ppo.py
+
+   # Should output:
+   # ✅ SUCCESS! PPO checkpoint loaded correctly!
+
+🎮 TIPS
+
+   • Close game window to skip to next game
+   • Press Ctrl+C to stop watching
+   • Use --delay 0.01 for faster games (less waiting)
+   • Use --opponent random to see PPO vs random agent
+   • Grid size: 8×8 (matches training after action space reduction)
+
+📂 CHECKPOINT LOCATIONS
+
+   PPO:  checkpoints/ppo_from_bc/latest_model.pt  (Episode 60, 276K steps)
+   BC:   checkpoints/bc/best_model.pt             (27.75% accuracy)
+
+🚀 NEXT STEPS
+
+   1. Watch your PPO agent play: ./watch_ppo.sh
+   2. Resume training: python src/training/train_ppo_potential.py --auto_resume
+   3. Monitor exploration: python src/evaluation/monitor_exploration.py
+
+╔══════════════════════════════════════════════════════════════════════════╗
+║                      🎉 EVERYTHING WORKING NOW!                           ║
+╚══════════════════════════════════════════════════════════════════════════╝

@@ -70,8 +70,9 @@ class Config:
     DQN_MIN_BUFFER_SIZE = 10_000  # Start training after this many transitions
     
     # Exploration
-    EPSILON_START = 0.1  # Start low since we have BC initialization
-    EPSILON_END = 0.01
+    EPSILON_START = 1.0  # Start high for DQN self-play
+    EPSILON_END = 0.1
+    EPSILON_DECAY = 0.999  # Multiplicative decay per episode
     EPSILON_DECAY_STEPS = 50_000
     
     # Training
