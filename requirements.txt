@@ -1,15 +1,33 @@
-numpy>=1.24.0
+# Generals.io Deep RL Project - Python Dependencies
+# Python 3.13+ required
+
+# Core Deep Learning
 torch>=2.0.0
+numpy>=1.24.0
+
+# Reinforcement Learning
 gymnasium>=0.29.0
-tqdm>=4.65.0
-datasets>=2.14.0
-huggingface-hub>=0.19.0
-tensorboard>=2.13.0
-matplotlib>=3.7.0
-scipy>=1.11.0
+
+# Data Processing
 pandas>=2.0.0
 h5py>=3.9.0
+scipy>=1.11.0
+datasets>=2.14.0
+huggingface-hub>=0.19.0
+
+# Visualization & Monitoring
+matplotlib>=3.7.0
+tensorboard>=2.13.0
 pillow>=10.0.0
 
-# For replay parsing (adjust based on actual format)
-# Add generals.io specific dependencies if needed
+# Utilities
+tqdm>=4.65.0
+
+# Optional: Development Tools (uncomment if needed)
+# pytest>=7.4.0
+# black>=23.0.0
+# flake8>=6.0.0
+# jupyter>=1.0.0
+
+# Installation:
+# pip install -r requirements.txt
